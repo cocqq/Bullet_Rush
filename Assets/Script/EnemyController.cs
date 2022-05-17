@@ -5,30 +5,35 @@ public class EnemyController : MyCharacterController
     [SerializeField] private ParticleController deadParticlePrefab;
     [SerializeField] private float maxHealth;
     private float helth;
-
+    private float dist;
+    private Transform player;
     private void Start()
     {
-        //GameManager.Instance.isRun = true;
+        player = GameObject.FindGameObjectWithTag("Player").transform;
         GameManager.Instance.EnemyAmount++;
         helth = maxHealth;
     }
     private void FixedUpdate()
     {
+        dist = Vector3.Distance(player.position, transform.position);
+        if(dist <= howclose)
+        {
         var player = PlayerController.Instance;
         var delta = -transform.position + player.transform.position;
         delta.y = 0;
         var direction = delta.normalized;
         Move(direction);
         transform.LookAt(player.transform);
+        }
     }
     private void OnTriggerEnter(Collider other) 
     {
         if(other.transform.CompareTag("Bullet"))
         {
             TakeDamege(1);
+            Vector3 closestPoint = other.ClosestPointOnBounds(gameObject.transform.position);
             other.gameObject.SetActive(false);
-            //gameObject.SetActive(false);
-            Instantiate(deadParticlePrefab, other.transform.position, Quaternion.identity);
+            Instantiate(deadParticlePrefab, closestPoint, Quaternion.identity);
         }
         
     }
